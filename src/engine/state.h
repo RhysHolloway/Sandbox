@@ -3,8 +3,6 @@
 //
 #pragma once
 
-#include "graphics.hpp"
-
 class ClientState {
 public:
 
@@ -13,5 +11,5 @@ public:
 //
 //    virtual void update(const Graphics &graphics);
 //
-//    virtual void render(const Graphics &graphics);
+//    virtual void client(const Graphics &graphics);
 };

@@ -6,3 +6,4 @@
 
 #define GAME_TITLE "Sandboxington"
 
+#define NAMESPACE namespace Sandbox

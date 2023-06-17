@@ -1,53 +1,72 @@
-#define SDL_MAIN_HANDLED
+#include <iostream>
 
-#include "engine/state.h"
+#include "client/world.h"
 
-#include "engine/graphics/camera.hpp"
-#include "skybox.h"
+#define TPS 25
+#define MAX_FRAMESKIP 10
+#define SKIP (1.0 / (double) TPS)
+
+void debugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                  const GLchar *message, const void *userParam)
+{
+    // Print, log, whatever based on the enums and message
+    std::cout << message << std::endl;
+}
 
 class GameClient {
 public:
 
-    void init(const Graphics &graphics) {
+    void init(Context &context) {
+
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(debugMessage, NULL);
+
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+
         glClearColor(0.0, 1.0, 0.0, 1.0);
 
-        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-        glLogicOp(GL_INVERT);
-        glCullFace(GL_FRONT);
-        glFrontFace(GL_CCW);
 
-        skybox.init(graphics);
+        world.init(context);
     };
 
-    void update(const Graphics &graphics) {
-        camera.input(graphics);
-//        camera.orientation = glm::rotate(camera.orientation, 0.004f, camera.up);
+    void update(Context &context) {
+        world.update(context);
     };
 
-    void render(Graphics &graphics) {
+    void render(Context &graphics, float interpolation) {
         graphics.window.resize();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        skybox.draw(graphics, camera);
+        world.render(graphics);
     };
 
-    void run(Graphics &graphics) {
+    void run(Context &context) {
 
-        this->init(graphics);
+        this->init(context);
 
         bool running = true;
 
-        double previous = glfwGetTime();
+        double gameTime = glfwGetTime();
+
+        std::uint32_t loops;
+        float interpolation;
 
         while (running) {
 
-            this->update(graphics);
+            loops = 0;
+            while (glfwGetTime() > gameTime && MAX_FRAMESKIP > loops) {
+                this->update(context);
+                gameTime += SKIP;
+                loops++;
+            }
 
-            this->render(graphics);
-            graphics.window.present();
+            interpolation = (float) (glfwGetTime() + SKIP - gameTime) / SKIP;
+            this->render(context, interpolation);
+            context.window.present();
 
             glfwPollEvents();
-            if (glfwWindowShouldClose(graphics.window.context)) {
+            if (glfwWindowShouldClose(context.window.context)) {
                 running = false;
             }
 
@@ -55,9 +74,7 @@ public:
     }
 
 private:
-    Camera camera;
-    Skybox skybox;
-
+    ClientWorld world;
 };
 //
 //#include <direct.h>
@@ -68,18 +85,18 @@ int main() {
 //    getcwd( buff, FILENAME_MAX );
 //    printf("Current working dir: %s\n", buff);
 
-    Graphics graphics = Graphics();
-    GameClient state = GameClient();
+    Context context = Context();
+    GameClient state;
 
-    GraphicsSettings graphicsSettings = GraphicsSettings{
-            .width = 800,
-            .height = 600
+    WindowSettings graphicsSettings = WindowSettings{
+            .width = 1280,
+            .height = 720
     };
 
-    if (!graphics.init(graphicsSettings)) {
+    if (!context.init(graphicsSettings)) {
         return -1;
     }
 
-    state.run(graphics);
+    state.run(context);
 
 }
