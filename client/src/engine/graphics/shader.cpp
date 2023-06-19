@@ -3,22 +3,14 @@
 //
 
 #include <fstream>
-#include <iostream>
-#include "../load.h"
+#include <format>
 
+#include "../load.h"
 #include "shader.h"
 
-void Engine::Shader::load(std::string vertexPath, std::string fragmentPath) {
-    std::string vertexCode, fragmentCode;
-    try {
-    vertexCode = util::read_to_string(vertexPath);
-    fragmentCode = util::read_to_string(fragmentPath);
-    }
-    catch (std::ifstream::failure e) {
-    std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-    }
-    const char *vShaderCode = vertexCode.c_str();
-    const char *fShaderCode = fragmentCode.c_str();
+void Engine::Shader::from_source(std::string vertexSource, std::string fragmentSource) {
+    const char *vShaderCode = vertexSource.c_str();
+    const char *fShaderCode = fragmentSource.c_str();
     // 2. compile shaders
     GLuint vertex, fragment;
     int success;
@@ -31,9 +23,8 @@ void Engine::Shader::load(std::string vertexPath, std::string fragmentPath) {
     // print compile errors if any
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
     if (!success) {
-    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    };
+        throw std::runtime_error(std::format("Could not compile vertex shader: \n{}", vertexSource));
+    }
 
     // similiar for Fragment Shader
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -42,8 +33,8 @@ void Engine::Shader::load(std::string vertexPath, std::string fragmentPath) {
     // print compile errors if any
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
     if (!success) {
-    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+        throw std::runtime_error(std::format("Could not compile fragment shader: \n{}", fragmentSource));
     };
 
     // shader Program
@@ -54,11 +45,16 @@ void Engine::Shader::load(std::string vertexPath, std::string fragmentPath) {
     // print linking errors if any
     glGetProgramiv(id, GL_LINK_STATUS, &success);
     if (!success) {
-    glGetProgramInfoLog(id, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        glGetProgramInfoLog(id, 512, NULL, infoLog);
+        throw std::runtime_error(std::format("Could not link shader with id {}", id));
     }
 
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+}
+
+void Engine::Shader::from_files(std::string vertexPath, std::string fragmentPath) {
+    from_source(util::read_to_string(vertexPath), util::read_to_string(fragmentPath));
+
 };

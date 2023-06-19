@@ -15,14 +15,8 @@ public:
     std::vector<WorldPlayer> players;
     std::unordered_map<ChunkPos, Chunk> chunks;
 
-    void generate_chunks();
+    void generate_default_chunks();
 
 private:
 
-    const uint8_t DISTANCE = 4;
-
 };
-
-template <class T, glm::qualifier Q> int cube_index(const glm::vec<3, T, Q>& vector, int size) {
-    return vector.x * size * size + vector.y * size + vector.z;
-}

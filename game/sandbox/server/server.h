@@ -6,26 +6,29 @@
 
 #include "sandbox/util/queue.h"
 
-#include "host.h"
+#include "sandbox/host.h"
 #include "player.h"
 
 #include "sandbox/world/world.h"
 #include "sandbox/util/buf.h"
+#include "sandbox/util.h"
+
 #include "packet.h"
 
 const std::set<std::string> exitCodes{"exit", "quit", "e", "q"};
-
-template <class Type, class BaseClass>
-concept CheckType = std::is_base_of<BaseClass, Type>::value;
 
 template <class Host> requires CheckType<Host, ServerHost>
 class Server {
 public:
 
+    Server(Host& h) : host{std::move(h)} {
+
+    }
+
     void init() {
         host.init();
-        world.players.push_back(WorldPlayer{});
-        world.generate_chunks();
+        world.players.emplace_back();
+        world.generate_default_chunks();
     }
 
     void run() {
@@ -36,13 +39,11 @@ public:
 
             host.process(
                 [this](ServerHost::PeerId p) {
-                    std::cout << p << " has connected!" << std::endl;
                     ServerPlayer player;
                     this->players.insert(std::make_pair(p, player));
-                    std::cout << world.chunks.size() << std::endl;
                     for (auto& pair : world.chunks) {
                         ByteBuffer buf{};
-                        buf.putByte(PacketHeader::Chunk);
+                        buf.putByte(PacketHeader::ChunkData);
                         buf.putFloat(pair.first.x);
                         buf.putFloat(pair.first.y);
                         buf.putFloat(pair.first.z);
@@ -55,7 +56,7 @@ public:
                     std::cout << p << " has disconnected!" << std::endl;
                     this->players.erase(p);
                 },
-                [](ServerHost::PeerId p, ByteBuffer b) {
+                [](ServerHost::PeerId p, const ByteBuffer& b) {
                     std::cout << p << " packet!" << std::endl;
                 }
             );
@@ -77,7 +78,7 @@ public:
 
     }
 
-    std::shared_ptr<Queue<std::string>> get_command_queue() const noexcept {
+    [[nodiscard]] std::shared_ptr<Queue<std::string>> get_command_queue() const noexcept {
         return command_queue;
     }
 

@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(unofficial-enet CONFIG REQUIRED)
 find_package(portaudio CONFIG REQUIRED)
+find_package(CMakeRC CONFIG REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/libs)
 add_library(lodepng ${CMAKE_SOURCE_DIR}/libs/lodepng.h ${CMAKE_SOURCE_DIR}/libs/lodepng.cpp)
@@ -14,16 +15,11 @@ include_directories(${CMAKE_SOURCE_DIR}/game)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-file(GLOB PROJECT_SOURCES src/*.cpp src/*/*.cpp src/*/*/*.cpp src/*/*/*/*.cpp)
-file(GLOB PROJECT_HEADERS src/*.hpp src/*/*.hpp src/*/*/*.hpp src/*/*/*/*.hpp src/*.h src/*/*.h src/*/*/*.h src/*/*/*/*.h)
+file(GLOB_RECURSE PROJECT_SOURCES src/*.cpp)
+file(GLOB_RECURSE PROJECT_HEADERS src/*.hpp src/*.h)
+file(GLOB_RECURSE PROJECT_ASSETS assets/*)
 
-add_custom_target(copy_assets COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)
+cmrc_add_resource_library(sandbox-resources ALIAS sandbox::rc NAMESPACE sandbox WHENCE assets ${PROJECT_ASSETS})
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ../resources/resource.rc)
-
-add_dependencies(${PROJECT_NAME} copy_assets)
-
-#target_compile_options(Sandbox PRIVATE -DUNICODE -DENGINE_DLL)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE SandboxGame glfw lodepng unofficial::enet::enet portaudio_static)
-#copy_required_dlls(Sandbox)
+target_link_libraries(${PROJECT_NAME} PRIVATE SandboxGame sandbox::rc glfw lodepng unofficial::enet::enet portaudio_static)

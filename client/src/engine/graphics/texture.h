@@ -13,12 +13,20 @@
 class Texture {
 public:
     void load(std::string path) {
-
         std::vector<unsigned char> buf;
         uint32_t width, height;
-
         lodepng::decode(buf, width, height, path);
+        load(buf, width, height);
+    }
 
+    void load(std::vector<unsigned char> data) {
+        std::vector<unsigned char> buf;
+        uint32_t width, height;
+        lodepng::decode(buf, width, height, data);
+        load(buf, width, height);
+    }
+
+    void load(std::vector<uint8_t> buf, uint32_t width, uint32_t height) {
         glGenTextures(1, &id);
         this->use();
 
@@ -29,6 +37,7 @@ public:
         }
         glGenerateMipmap(GL_TEXTURE_2D);
     }
+
     void use() const {
         glBindTexture(GL_TEXTURE_2D, id);
     }

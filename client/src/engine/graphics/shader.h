@@ -12,7 +12,9 @@ namespace Engine {
 
         GLuint id = 0;
 
-        void load(std::string vertexPath, std::string fragmentPath);
+        void from_source(std::string vertexSource, std::string fragmentSource);
+
+        void from_files(std::string vertexPath, std::string fragmentPath);
 
         void use() const {
             glUseProgram(id);

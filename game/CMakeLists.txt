@@ -13,7 +13,7 @@ IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 include_directories(../libs)
-add_library(FastNoiseLite ../libs/FastNoiseLite.h ../libs/FastNoiseLite.cpp)
+add_library(PerlinNoise ../libs/FastNoiseLite.h ../libs/FastNoiseLite.cpp)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/sandbox")
 
@@ -22,4 +22,4 @@ file(GLOB PROJECT_HEADERS sandbox/*.hpp sandbox/*/*.hpp sandbox/*/*/*.hpp sandbo
 
 add_library(${PROJECT_NAME} ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Tracy::TracyClient GLEW::GLEW glm::glm PRIVATE FastNoiseLite)
+target_link_libraries(${PROJECT_NAME} PUBLIC Tracy::TracyClient GLEW::GLEW glm::glm PRIVATE PerlinNoise)

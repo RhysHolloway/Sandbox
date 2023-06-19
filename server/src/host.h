@@ -6,7 +6,7 @@
 #include <enet/enet.h>
 #include <iostream>
 
-#include "sandbox/server/host.h"
+#include "sandbox/host.h"
 #include "sandbox/util/buf.h"
 
 class NetHost : public ServerHost {
@@ -37,7 +37,7 @@ public:
     void process(
         std::function<void(PeerId)> connect,
         std::function<void(PeerId)> disconnect,
-        std::function<void(PeerId, ByteBuffer)> receive
+        std::function<void(PeerId, const ByteBuffer&)> receive
     ) override {
         while(enet_host_service(server, &event, 17) > 0) {
             ENetPeer *p = event.peer;
@@ -64,7 +64,7 @@ public:
                 }
                 default: {
                     // unreachable
-                    exit(EXIT_FAILURE);
+                    std::unreachable();
                 }
             }
         }

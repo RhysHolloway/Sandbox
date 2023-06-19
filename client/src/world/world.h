@@ -1,10 +1,10 @@
 #pragma once
 
 #include "textures.h"
-#include "skybox.h"
+#include "world/skybox/skybox.h"
 #include "chunk/renderer.h"
 #include "sandbox/util/buf.h"
-#include "sandbox/world/chunk.h"
+#include "sandbox/server/packet.h"
 
 class ClientWorld {
 public:
@@ -15,11 +15,7 @@ public:
         chunks.init(ctx, textures);
     }
     
-    void add_chunk(ByteBuffer buf) {
-        ChunkPos pos = ChunkPos(buf.getFloat(), buf.getFloat(), buf.getFloat());
-        Chunk chunk = Chunk::deserialize(buf);
-        chunks.mesh(pos, chunk);
-    }
+    void read_packet(PacketHeader header, ByteBuffer buf);
 
     void update(Context &ctx) {
     }

@@ -2,37 +2,39 @@
 
 #include "world.h"
 
-void World::generate_chunks() {
+#define DISTANCE 6
+
+//template <class T, glm::qualifier Q> int cube_index(const glm::vec<3, T, Q>& vector, T size) {
+//    return (int) (vector.x * size * size + vector.y * size + vector.z);
+//}
+
+int chunk_index(const glm::u8vec3& vector) {
+    return (int) (vector.x * CHUNK_SIZE * CHUNK_SIZE + vector.y * CHUNK_SIZE + vector.z);
+}
+
+void World::generate_default_chunks() {
 
     FastNoiseLite noise;
-    noise.SetSeed(time(NULL));
-//        noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+//    noise.SetSeed(time(NULL));
+//    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 
-    for (WorldPlayer& player : players) {
-        for(int x = -DISTANCE; x < DISTANCE; x++) {
-            for (int y = -DISTANCE; y <DISTANCE; y++) {
-                for (int z = -DISTANCE; z < DISTANCE; z++) {
-                    auto pos = player.chunkPos + ChunkPos(x, y, z);
-                    if(auto entry = chunks.find(pos); entry != chunks.end()) {
-
-                    } else if (y == 1) {
-                        Chunk chunk;
-                        chunk.voxels.fill(0);
-                        for (int z = 0; z < CHUNK_SIZE; z++) {
-                            for (int x = 0; x < CHUNK_SIZE; x++) {
-                                uint8_t height = (uint8_t) (noise.GetNoise((float) (pos.x * 16) + x, (float) (pos.z * 16) + z) * 8.0f + 8.0f);
-                                for (int y = 0; y < height; y++) {
-                                    chunk.voxels[x + y * CHUNK_SIZE + z * CHUNK_SIZE * CHUNK_SIZE] = y == height - 1 ? 3 : 2;
-                                }
-                            }
+    for (int cz = -DISTANCE; cz < DISTANCE; cz++) {
+        for (int cy = -DISTANCE; cy < DISTANCE; cy++) {
+            for(int cx = -DISTANCE; cx < DISTANCE; cx++) {
+                auto pos = ChunkPos(cx, cy, cz);
+                Chunk chunk;
+                for (uint8_t vx = 0; vx < CHUNK_SIZE; vx++) {
+                    for (uint8_t vz = 0; vz < CHUNK_SIZE; vz++) {
+                        for (uint8_t vy = 0; vy < CHUNK_SIZE; vy++) {
+                            float n = noise.GetNoise((float) (cx * CHUNK_SIZE), (float) (cy * CHUNK_SIZE) + (float) vy, (float) (cz * CHUNK_SIZE) + (float) vz);
+                            chunk.voxelAt(VoxelPos(vx, vy, vz)) = n < 0.0f ? 0 : n > 0.1f ? n > 0.225f ? 2 : 3 : 1;
                         }
-                        chunks.insert(std::pair{pos, chunk});
-                    } else if (y < 1) {
-                        Chunk chunk;
-                        chunk.voxels.fill(2);
-                        chunks.insert(std::pair{pos, chunk});
                     }
                 }
+//                for (uint8_t x = 0; x < CHUNK_SIZE; x++) {
+                    chunk.voxelAt(VoxelPos(0, 0, 0)) = 145 + cx;
+//                }
+                chunks.insert(std::pair{ChunkPos(cx, cy, cz), chunk});
             }
         }
     }

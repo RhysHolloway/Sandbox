@@ -3,6 +3,6 @@
 #include <stdint.h>
 
 enum PacketHeader : uint8_t {
-    Chunk
+    ChunkData
 };
 

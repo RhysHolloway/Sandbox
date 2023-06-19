@@ -4,13 +4,18 @@
 #include <format>
 #include <stdexcept>
 #include <enet/enet.h>
-
 #include <iostream>
 
-class ClientNetHost {
+#include "sandbox/host.h"
+
+class ClientNetHost : public ClientHost {
 public:
 
-    //TODO: fix 3 seconds of waiting
+    void init() override {
+        throw std::runtime_error("finish writing client net host!");
+    }
+
+    //TODO: fix waiting (use async), and return an enum if the client successfully connects OR entered an invalid hostname
     bool connect(std::string hostname) {
 
         auto loc = hostname.find(':');
@@ -21,9 +26,9 @@ public:
         auto hostAddr = hostname.substr(0, loc);
         uint16_t port = std::stoi(hostname.substr(loc + 1, hostname.length()));
 
-//        if (enet_initialize()) {
-//            throw std::runtime_error("Could not initialize networking!");
-//        }
+        if (enet_initialize()) {
+            throw std::runtime_error("Could not initialize ENet!");
+        }
 
         host = enet_host_create(NULL, 1, 2, 0, 0);
         if (!host) {
@@ -79,7 +84,7 @@ public:
         }
     }
 
-    ~ClientNetHost() {
+    ~ClientNetHost() override {
         std::cout << "Dropping enet client host" << std::endl;
         enet_peer_disconnect(server, 0);
         enet_host_flush(host);
