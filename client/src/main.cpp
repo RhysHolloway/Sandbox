@@ -8,6 +8,8 @@ using namespace Engine;
 #include "world/world.h"
 #include "host.h"
 
+#include "sandbox/server/server.h"
+
 #define TPS 25
 #define MAX_FRAMESKIP 10
 #define SKIP (1.0 / (double) TPS)
@@ -60,6 +62,13 @@ public:
 
         while (running) {
 
+            net.update([this](std::vector<uint8_t> data) {
+                ByteBuffer buf{data.data(), data.size()};
+
+                std::cout << buf.getByte() << std::endl;
+                world.add_chunk(buf);
+            });
+
             loops = 0;
             while (glfwGetTime() > gameTime && MAX_FRAMESKIP > loops) {
                 this->update(context);
@@ -78,6 +87,7 @@ public:
 
         }
     }
+    ClientNetHost net;
 
 private:
     ClientWorld world;
@@ -97,9 +107,27 @@ int main() {
         return -1;
     }
 
-    ClientNetHost host = ClientNetHost("localhost:25555");
-    std::cout << host.connect() << std::endl;
+    if (enet_initialize() != 0) {
+        throw std::runtime_error("Could not initialize ENet!");
+    }
+
+//    Server server;
+//    auto queue = server.get_command_queue();
+//
+//    std::thread thread([&server]() {
+//        std::move(server).run();
+//    });
+
+    bool c = state.net.connect("127.0.0.1:25555");
+    std::cout << (c ? "connected" : "could not connect") << std::endl;
+    if(!c)
+        throw std::runtime_error("Could not connect to server!");
+
+    state.net.ping();
 
     state.run(context);
+
+//    queue->push("exit");
+//    thread.join();
 
 }

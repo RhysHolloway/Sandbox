@@ -13,8 +13,10 @@
 #include <plog/Appenders/ConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <toml.hpp>
+#include <enet/enet.h>
 
 #include "sandbox/server/server.h"
+#include "host.h"
 
 const std::string configFile("config.toml");
 
@@ -34,10 +36,15 @@ int main() {
     auto data = toml::parse(configFile);
     auto port = toml::find<uint16_t>(data, "port");
 
+    if (enet_initialize()) {
+        throw std::runtime_error("Could not initialize ENet!");
+    }
+
     PLOGI << "Starting server...";
 
-    Server server;
-//    server.host = NetHost(port);
+    Server<NetHost> server;
+
+    server.init();
 
     auto commands = server.get_command_queue();
 

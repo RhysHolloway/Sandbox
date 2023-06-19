@@ -1,62 +1,26 @@
 #pragma once
 
-//template<typename Peer> class ServerHost {
-//public:
-//    virtual void init();
-//
-//    void recieve();
-//
-//    virtual void send();
-//
-//    virtual ~ServerHost();
-//};
-
 #include <stdint.h>
-#include <stdexcept>
-#include <enet/enet.h>
-#include <sandbox/server/host.h>
+#include <functional>
 
-#include <iostream>
+#include "sandbox/util/buf.h"
 
-class NetHost /*: ServerHost<ENetAddress> */ {
+class ServerHost {
 public:
-//
-//    NetHost(uint16_t port) {
-//        this->port = port;
-//    }
 
-    void init() {
+    typedef uint32_t PeerId;
 
-        if (enet_initialize() != 0) {
-            throw std::runtime_error("Could not initialize ENet!");
-        }
+    virtual void init() = 0;
 
-        ENetAddress address;
+    virtual void process(
+        std::function<void(PeerId)>,
+        std::function<void(PeerId)>,
+        std::function<void(PeerId, ByteBuffer)>
+    ) = 0;
 
-        address.host = ENET_HOST_ANY;
-        address.port = 25555;//this->port;
+    virtual void send(PeerId, std::vector<uint8_t>, bool reliable) = 0;
 
-        server = enet_host_create(&address, 32, 2, 0, 0);
+    virtual void broadcast(std::vector<uint8_t>, bool reliable) = 0;
 
-        if (server == NULL) {
-            throw std::runtime_error("Could not create host!");
-        }
-    };
-
-    //void send()
-
-    //void broadcast()
-
-//    std::optional<> recieve()
-
-    ~NetHost() {
-        std::cout << "Destroying server networking host" << std::endl;
-        enet_host_destroy(server);
-    }
-
-//private:
-
-//    uint16_t port;
-    ENetHost *server;
-    // ENetEvent event;
+    virtual ~ServerHost() = default;
 };

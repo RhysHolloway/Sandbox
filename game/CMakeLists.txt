@@ -5,9 +5,12 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(GLEW CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(toml11 CONFIG REQUIRED)
 #find_package(plog CONFIG REQUIRED)
-find_package(unofficial-enet CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
+
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    message("debug mode")
+ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 include_directories(../libs)
 add_library(FastNoiseLite ../libs/FastNoiseLite.h ../libs/FastNoiseLite.cpp)
@@ -19,4 +22,4 @@ file(GLOB PROJECT_HEADERS sandbox/*.hpp sandbox/*/*.hpp sandbox/*/*/*.hpp sandbo
 
 add_library(${PROJECT_NAME} ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} GLEW::GLEW glm::glm FastNoiseLite toml11::toml11 unofficial::enet::enet)
+target_link_libraries(${PROJECT_NAME} PUBLIC Tracy::TracyClient GLEW::GLEW glm::glm PRIVATE FastNoiseLite)

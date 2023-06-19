@@ -9,6 +9,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../util/buf.h"
+
 #include "voxel.h"
 
 // 8 subdivisions
@@ -33,4 +35,15 @@ public:
     VoxelID voxelAt(glm::vec<3, std::uint8_t> loc) const {
         return this->voxels[loc.x + loc.y * CHUNK_SIZE + loc.z * CHUNK_SIZE * CHUNK_SIZE];
     }
+
+    void serialize(ByteBuffer& buf) {
+        buf.putBytes(reinterpret_cast<uint8_t*>(this->voxels.data()), CHUNK_VOLUME * (sizeof(VoxelID) / sizeof(uint8_t)));
+    }
+
+    static Chunk deserialize(ByteBuffer& buf) {
+        Chunk chunk;
+        buf.getBytes(reinterpret_cast<uint8_t *>(chunk.voxels.data()), CHUNK_VOLUME * (sizeof(VoxelID) / sizeof(uint8_t)));
+        return chunk;
+    }
+
 };

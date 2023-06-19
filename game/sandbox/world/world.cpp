@@ -8,7 +8,7 @@ void World::generate_chunks() {
     noise.SetSeed(time(NULL));
 //        noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 
-    std::for_each(players.begin(), players.end(), [this, &noise](WorldPlayer& player) {
+    for (WorldPlayer& player : players) {
         for(int x = -DISTANCE; x < DISTANCE; x++) {
             for (int y = -DISTANCE; y <DISTANCE; y++) {
                 for (int z = -DISTANCE; z < DISTANCE; z++) {
@@ -35,5 +35,5 @@ void World::generate_chunks() {
                 }
             }
         }
-    });
+    }
 }

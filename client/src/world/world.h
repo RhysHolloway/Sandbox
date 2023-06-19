@@ -3,15 +3,22 @@
 #include "textures.h"
 #include "skybox.h"
 #include "chunk/renderer.h"
+#include "sandbox/util/buf.h"
+#include "sandbox/world/chunk.h"
 
 class ClientWorld {
 public:
-//    WorldRenderer renderer;
 
     void init(Context& ctx) {
         skybox.init(ctx);
         textures.init(ctx);
         chunks.init(ctx, textures);
+    }
+    
+    void add_chunk(ByteBuffer buf) {
+        ChunkPos pos = ChunkPos(buf.getFloat(), buf.getFloat(), buf.getFloat());
+        Chunk chunk = Chunk::deserialize(buf);
+        chunks.mesh(pos, chunk);
     }
 
     void update(Context &ctx) {

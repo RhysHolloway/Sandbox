@@ -39,18 +39,12 @@ class ChunkRenderer {
 public:
     void init(Context &ctx, const WorldTextures &textures) {
         chunkShader.load("assets/shaders/chunk.vert", "assets/shaders/chunk.frag");
-//        chunks.reserve(std::pow((int) renderDistance, 3));
+    }
 
-        World world;
-        world.players.push_back(WorldPlayer{});
-        world.generate_chunks();
-
-        for (auto &entry: world.chunks) {
-            ClientChunk cc = ClientChunk(entry.first);
-            cc.mesh.remesh(entry.second);
-            chunks.push_back(cc);
-        }
-
+    void mesh(ChunkPos pos, Chunk& chunk) {
+        ClientChunk cc = ClientChunk(pos);
+        cc.mesh.remesh(chunk);
+        chunks.push_back(cc);
     }
 
     void setCenter(ChunkPos pos) {
@@ -65,12 +59,12 @@ public:
         auto posUniform = glGetUniformLocation(chunkShader.id, "relativeChunkPos");
 
         auto c = center;
-        std::for_each(chunks.begin(), chunks.end(), [&ctx, c, posUniform](ClientChunk& chunk) {
+        for(ClientChunk& chunk : chunks) {
             auto rcp = c - chunk.pos;
 //            std::cout << rcp.x << " " << rcp.y << " " << rcp.z << std::endl;
             glUniform3i(posUniform, rcp.x, rcp.y, rcp.z);
             chunk.mesh.draw(ctx);
-        });
+        }
     }
 private:
     Shader chunkShader;

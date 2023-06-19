@@ -3,9 +3,7 @@ project(SandboxClient VERSION 0.0.1 DESCRIPTION "Sandbox Game Client" LANGUAGES 
 
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(GLEW CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
 find_package(unofficial-enet CONFIG REQUIRED)
 find_package(portaudio CONFIG REQUIRED)
 
@@ -27,5 +25,5 @@ add_dependencies(${PROJECT_NAME} copy_assets)
 
 #target_compile_options(Sandbox PRIVATE -DUNICODE -DENGINE_DLL)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SandboxGame glfw GLEW::GLEW glm::glm lodepng unofficial::enet::enet portaudio_static)
+target_link_libraries(${PROJECT_NAME} PRIVATE SandboxGame glfw lodepng unofficial::enet::enet portaudio_static)
 #copy_required_dlls(Sandbox)
