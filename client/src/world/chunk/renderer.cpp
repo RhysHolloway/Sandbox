@@ -1,38 +1,39 @@
 #include <cmrc/cmrc.hpp>
+
 CMRC_DECLARE(sandbox);
 
 #include "renderer.h"
+#include "mesh/mesher.h"
 
-void ChunkRenderer::init(Context &ctx, const WorldTextures &textures) {
+void ChunkRenderer::init() {
     auto fs = cmrc::sandbox::get_filesystem();
-    auto vert = fs.open("shaders/chunk.vert");
-    auto frag = fs.open("shaders/chunk.frag");
+    auto vert = fs.open("shaders/chunk.vert"), frag = fs.open("shaders/chunk.frag"), textureData = fs.open("textures/blocks.png");
+    voxels = Engine::Texture(std::vector<unsigned char>{textureData.begin(), textureData.end()}, false);
+    voxels.use();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     chunkShader.from_source(std::string(vert.begin(), vert.end()), std::string(frag.begin(), frag.end()));
 }
 
-void ChunkRenderer::mesh(ChunkPos pos, Chunk& chunk) {
-    ClientChunk cc = ClientChunk(pos);
-    cc.mesh.remesh(chunk);
-    chunks.push_back(cc);
+void ChunkRenderer::remesh(BS::thread_pool &pool, ChunkPos pos, Chunk &chunk) {
+    chunks[pos].remesh = std::make_optional<std::future<std::vector<VoxelVertex>>>(pool.submit([&chunk]() {
+        std::unique_lock lock{*chunk.lock};
+        return Mesher::Mesh(chunk.voxels);
+    }));
 }
 
-void ChunkRenderer::setCenter(ChunkPos pos) {
-    this->center = pos;
-}
-
-void ChunkRenderer::render(Context &ctx, const Camera& camera/*, const WorldPlayer& player*/) {
+void ChunkRenderer::render(const glm::mat4 &projection, const LocalPlayer &player) {
     chunkShader.use();
-    glm::mat4 matrix = camera.projection(ctx.window.getScale()) * camera.view();
-    glUniformMatrix4fv(glGetUniformLocation(chunkShader.id, "camera"), 1, GL_FALSE, glm::value_ptr(matrix));
+    voxels.use();
+//    auto camera = player.camera(ctx);
+    auto camera = player.camera(projection);
+    glUniformMatrix4fv(glGetUniformLocation(chunkShader.id, "camera"), 1, GL_FALSE, glm::value_ptr(camera));
 
-    auto posUniform = glGetUniformLocation(chunkShader.id, "relativeChunkPos");
-
-    auto c = center;
-    for(ClientChunk& chunk : chunks) {
-        auto rcp = c - chunk.pos;
-//            std::cout << rcp.x << " " << rcp.y << " " << rcp.z << std::endl;
+    GLint posUniform = glGetUniformLocation(chunkShader.id, "relativeChunkPos");
+    for (auto &pair: chunks) {
+        auto rcp = player.position.chunk - pair.first;
         glUniform3i(posUniform, rcp.x, rcp.y, rcp.z);
-        chunk.mesh.draw(ctx);
+        pair.second.mesh.draw();
     }
 }

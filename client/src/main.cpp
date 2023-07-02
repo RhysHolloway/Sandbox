@@ -1,72 +1,34 @@
-#include <sandbox/server/server.h>
-
-#include "engine/context.h"
-using namespace Engine;
-
+#include "sandbox/server.h"
 #include "client/net.h"
 #include "client/local.h"
 #include "client.h"
 
-#define TPS 25
-#define MAX_FRAMESKIP 10
-#define SKIP (1.0 / (double) TPS)
-
 int main() {
 
-    Context context = Context();
+    ClientNetHost host;
 
-    WindowSettings graphicsSettings = WindowSettings{
-            .width = 1280,
-            .height = 720
+    if (!host.connect("localhost:25555")) {
+        throw std::runtime_error("Could not connect to server!");
     };
 
-    if (!context.init(graphicsSettings)) {
-        return -1;
-    }
+//    auto connection = LocalClientHost::create_pair();
 
-    auto connection = LocalClientHost::create_pair();
+//    Server<LocalServerHost> server = Server(connection.first);
+//    server.init();
+//    auto queue = server.get_command_queue();
 
-    Server<LocalServerHost> server = Server(connection.first);
-    server.init();
-    auto queue = server.get_command_queue();
+//    std::thread thread([&server]() {
+//        std::move(server).run();
+//    });
 
-    std::thread thread([&server]() {
-        std::move(server).run();
-    });
+    host.send(std::vector<uint8_t>{ ClientPacket::Authenticate }, true);
 
-    GameClient<LocalClientHost> client = GameClient(connection.second);
-    client.init(context);
+    GameClient<ClientNetHost> client = GameClient{host};
 
-    bool running = true;
+    client.init();
+    client.run();
 
-    double gameTime = glfwGetTime();
-
-    std::uint32_t loops;
-    float interpolation;
-
-    while (running) {
-
-//        client.input();
-
-        loops = 0;
-        while (glfwGetTime() > gameTime && MAX_FRAMESKIP > loops) {
-            client.update(context);
-            gameTime += SKIP;
-            loops++;
-        }
-
-        interpolation = (float) (glfwGetTime() + SKIP - gameTime) / SKIP;
-        client.render(context, interpolation);
-        context.window.present();
-
-        glfwPollEvents();
-        if (glfwWindowShouldClose(context.window.context)) {
-            running = false;
-        }
-
-    }
-
-    queue->push("exit");
-    thread.join();
+//    queue->push("exit");
+//    thread.join();
 
 }

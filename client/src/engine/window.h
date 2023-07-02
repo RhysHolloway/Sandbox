@@ -5,75 +5,49 @@
 #pragma once
 
 #include <string>
-#include <functional>
 
-#include "GLFW/glfw3.h"
+#include "button.h"
 
-struct WindowSettings {
-public:
-    ::uint16_t width, height;
-};
+namespace Engine {
 
-class Window {
-public:
-    Window() = default;
+    class Window {
+    private:
+        typedef int Key;
+        typedef int Mouse;
+        typedef struct GLFWwindow GLFWwindow;
+        int width, height;
+    public:
 
-    bool init(const WindowSettings& settings, std::string title) {
-        {
-            if (!glfwInit()) {
-                return false;
-            }
+        GLFWwindow *context;
 
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        Window() = default;
+        void init(const std::string &title, int w, int h);
 
-            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+        ~Window();
 
-            this->context = glfwCreateWindow(settings.width, settings.height, title.c_str(), NULL, NULL);
-            if (!context)
-                return false;
+        void make_current();
+        void present();
 
-            this->width = width;
-            this->height = height;
+        /**
+         * Run on resize
+         */
+        void resize();
 
-            this->resize();
+        int getWidth() const;
+        int getHeight() const;
+        float getScale() const;
 
-            return true;
-        }
-    }
+        /// TODO: move to central input class
+        bool key_pressed(Key scancode) const;
+        bool key_released(Key scancode) const;
+        bool mouse_pressed(Mouse button) const;
+        bool mouse_released(Mouse button) const;
 
-    /**
-     * Run on resize
-     */
-    void resize() {
-        glfwGetFramebufferSize(context, &width, &height);
-        glViewport(0, 0, width, height);
-    }
+        void show_cursor(bool show);
+        void set_cursor_position(double x, double y);
+        std::pair<double, double> cursor_position() const;
 
-    void present() {
-        glfwSwapBuffers(context);
-    }
 
-    ~Window() {
-        glfwDestroyWindow(context);
-        glfwTerminate();
-    }
+    };
 
-    std::uint16_t getWidth() const {
-        return width;
-    }
-    std::uint16_t getHeight() const {
-        return height;
-    }
-
-    float getScale() const {
-        return (float) width / (float) height;
-    }
-
-//protected:
-    GLFWwindow *context;
-private:
-    int width;
-    int height;
-};
+}

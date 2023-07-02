@@ -1,9 +1,27 @@
 #pragma once
 
 #include "chunk.h"
+#include "../util.h"
+
+struct PlayerPosition {
+    ChunkPos chunk;
+    LocalPos local;
+    glm::vec3 orientation;
+    glm::vec3 velocity; // voxels/sec
+
+    PlayerPosition(ChunkPos c = ChunkPos(0), LocalPos l = LocalPos(0.f), glm::vec3 o = glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3 v = glm::vec3(0.f)) : chunk{c}, local{l}, orientation{o}, velocity{v} {}
+
+    bool update();
+
+    glm::mat4 view() const;
+
+    static PlayerPosition deserialize(const ByteBuffer &buf);
+
+    void serialize(ByteBuffer &buf) const;
+};
 
 class WorldPlayer {
 public:
-    ChunkPos chunkPos;
-    LocalPos localPos;
+//    std::unordered_set<ChunkPos> loaded_chunks;
+    PlayerPosition position;
 };

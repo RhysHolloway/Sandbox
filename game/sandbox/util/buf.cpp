@@ -218,12 +218,20 @@ float ByteBuffer::getFloat(size_t index) const {
     return read<float>(index);
 }
 
-uint32_t ByteBuffer::getInt() const {
-    return read<size_t>();
+uint32_t ByteBuffer::getUInt() const {
+    return read<uint32_t>();
 }
 
-uint32_t ByteBuffer::getInt(size_t index) const {
+uint32_t ByteBuffer::getUInt(size_t index) const {
     return read<uint32_t>(index);
+}
+
+int32_t ByteBuffer::getSInt() const {
+    return read<int32_t>();
+}
+
+int32_t ByteBuffer::getSInt(size_t index) const {
+    return read<int32_t>(index);
 }
 
 uint64_t ByteBuffer::getLong() const {
@@ -292,20 +300,48 @@ void ByteBuffer::putDouble(double value) {
 void ByteBuffer::putDouble(double value, size_t index) {
     insert<double>(value, index);
 }
+
 void ByteBuffer::putFloat(float value) {
     append<float>(value);
+}
+
+
+void ByteBuffer::putVec3(const glm::vec3 &value) {
+    putFloat(value.x);
+    putFloat(value.y);
+    putFloat(value.z);
+}
+
+void ByteBuffer::putIVec3(const glm::ivec3 &value) {
+    putSInt(value.x);
+    putSInt(value.y);
+    putSInt(value.z);
+}
+
+void ByteBuffer::putU8Vec3(const glm::u8vec3 &value) {
+    putByte(value.x);
+    putByte(value.y);
+    putByte(value.z);
 }
 
 void ByteBuffer::putFloat(float value, size_t index) {
     insert<float>(value, index);
 }
 
-void ByteBuffer::putInt(uint32_t value) {
+void ByteBuffer::putUInt(uint32_t value) {
     append<uint32_t>(value);
 }
 
-void ByteBuffer::putInt(uint32_t value, size_t index) {
+void ByteBuffer::putUInt(uint32_t value, size_t index) {
     insert<uint32_t>(value, index);
+}
+
+void ByteBuffer::putSInt(int32_t value) {
+    append<int32_t>(value);
+}
+
+void ByteBuffer::putSInt(int32_t value, size_t index) {
+    insert<int32_t>(value, index);
 }
 
 void ByteBuffer::putLong(uint64_t value) {

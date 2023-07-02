@@ -36,6 +36,8 @@
 #include <vector>
 #include <memory>
 
+#include <glm/glm.hpp>
+
 #ifdef BB_UTILITY
 #include <iostream>
 #include <cstdio>
@@ -93,8 +95,10 @@ namespace bb {
         double getDouble(size_t index) const;
         float getFloat() const;
         float getFloat(size_t index) const;
-        uint32_t getInt() const;
-        uint32_t getInt(size_t index) const;
+        uint32_t getUInt() const;
+        uint32_t getUInt(size_t index) const;
+        int32_t getSInt() const;
+        int32_t getSInt(size_t index) const;
         uint64_t getLong() const;
         uint64_t getLong(size_t index) const;
         uint16_t getShort() const;
@@ -116,12 +120,18 @@ namespace bb {
         void putDouble(double value, size_t index);
         void putFloat(float value);
         void putFloat(float value, size_t index);
-        void putInt(uint32_t value);
-        void putInt(uint32_t value, size_t index);
+        void putUInt(uint32_t value);
+        void putUInt(uint32_t value, size_t index);
+        void putSInt(int32_t value);
+        void putSInt(int32_t value, size_t index);
         void putLong(uint64_t value);
         void putLong(uint64_t value, size_t index);
         void putShort(uint16_t value);
         void putShort(uint16_t value, size_t index);
+
+        void putVec3(const glm::vec3 &value);
+        void putIVec3(const glm::ivec3 &value);
+        void putU8Vec3(const glm::u8vec3 &value);
 
         // Buffer Position Accessors & Mutators
 
@@ -141,8 +151,8 @@ namespace bb {
             return wpos;
         }
 
-        std::vector<uint8_t> finish() const {
-            return std::move(buf);
+        const std::vector<uint8_t>& data() const {
+            return buf;
         }
 
         // Utility Functions

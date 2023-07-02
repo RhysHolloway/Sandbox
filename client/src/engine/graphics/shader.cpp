@@ -4,11 +4,12 @@
 
 #include <fstream>
 #include <format>
+#include <GL/glew.h>
 
 #include "../load.h"
 #include "shader.h"
 
-void Engine::Shader::from_source(std::string vertexSource, std::string fragmentSource) {
+void Engine::Shader::from_source(const std::string &vertexSource, const std::string &fragmentSource) {
     const char *vShaderCode = vertexSource.c_str();
     const char *fShaderCode = fragmentSource.c_str();
     // 2. compile shaders
@@ -23,7 +24,8 @@ void Engine::Shader::from_source(std::string vertexSource, std::string fragmentS
     // print compile errors if any
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
     if (!success) {
-        throw std::runtime_error(std::format("Could not compile vertex shader: \n{}", vertexSource));
+        throw std::runtime_error(std::format("Could not compile vertex shader with error {}", success));
+//        std::cout << "shader compile error" << std::endl;
     }
 
     // similiar for Fragment Shader
@@ -34,7 +36,7 @@ void Engine::Shader::from_source(std::string vertexSource, std::string fragmentS
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        throw std::runtime_error(std::format("Could not compile fragment shader: \n{}", fragmentSource));
+        throw std::runtime_error(std::format("Could not compile fragment shader with error {}", success));
     };
 
     // shader Program
@@ -54,7 +56,10 @@ void Engine::Shader::from_source(std::string vertexSource, std::string fragmentS
     glDeleteShader(fragment);
 }
 
-void Engine::Shader::from_files(std::string vertexPath, std::string fragmentPath) {
+void Engine::Shader::from_files(const std::string &vertexPath, const std::string &fragmentPath) {
     from_source(util::read_to_string(vertexPath), util::read_to_string(fragmentPath));
+}
 
+void Engine::Shader::use() const {
+    glUseProgram(id);
 };

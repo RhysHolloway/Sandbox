@@ -48,7 +48,7 @@ public:
 
     T pop() {
         std::unique_lock<std::mutex> lock(mutex);
-        condition.wait(lock, [=] { return !this->deque.empty(); });
+        condition.wait(lock, [this] { return !this->deque.empty(); });
         T rc(std::move(deque.back()));
         deque.pop_back();
         return rc;

@@ -2,45 +2,42 @@
 
 #include <unordered_map>
 #include <glm/gtc/type_ptr.hpp>
+#include <BS_thread_pool.hpp>
 
 #include <sandbox/world/world.h>
 
-#include "engine/context.h"
-#include "engine/graphics/camera.h"
 #include "engine/graphics/shader.h"
+#include "engine/graphics/texture.h"
 
-#include "../textures.h"
-#include "mesh.h"
-
-enum ChunkStatus {
-    NONE,
-    TO_GENERATE,
-    GENERATING,
-    ACTIVE,
-//    OLD
-};
+#include "../player.h"
+#include "mesh/mesh.h"
 
 struct ClientChunk {
-    ChunkPos pos;
-    ChunkMesh mesh = ChunkMesh();
-
-    ClientChunk(ChunkPos pos) {
-        this->pos = pos;
-    }
+    ChunkMesh mesh;
+    std::optional<std::future<std::vector<VoxelVertex>>> remesh = std::nullopt;
 };
 
 class ChunkRenderer {
 public:
-    void init(Context &ctx, const WorldTextures &textures);
+    void init();
 
-    void mesh(ChunkPos pos, Chunk& chunk);
+    void update() {
+        for (auto &pair : chunks) {
+            if (pair.second.remesh) {
+                if (pair.second.remesh->wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                    pair.second.mesh.with_mesh(pair.second.remesh->get());
+                    pair.second.remesh = std::nullopt;
+                }
+            }
+        }
+    }
 
-    void setCenter(ChunkPos pos);
+    void remesh(BS::thread_pool& pool, ChunkPos pos, Chunk &chunk);
 
-    void render(Context &ctx, const Camera& camera/*, const WorldPlayer& player*/);
+    void render(const glm::mat4& projection, const LocalPlayer& player);
 private:
-    Shader chunkShader;
-    ChunkPos center = ChunkPos(0);
+    Engine::Texture voxels;
+    Engine::Shader chunkShader;
     uint8_t renderDistance = 8;
-    std::vector<ClientChunk> chunks = std::vector<ClientChunk>();
+    std::unordered_map<ChunkPos, ClientChunk> chunks;
 };

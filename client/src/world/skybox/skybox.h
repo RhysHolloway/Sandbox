@@ -1,21 +1,13 @@
-//
-// Created by Rhys on 5/16/2023.
-//
-
 #pragma once
 
-#include <GL/glew.h>
-
-#include "engine/graphics/camera.h"
 #include "engine/graphics/shader.h"
-
-using namespace Engine;
+#include "../player.h"
 
 class Skybox {
 public:
-    void init(Context &ctx);
-    void render(const Context& ctx, const Camera& camera) const;
+    void init();
+    void render(const glm::mat4& projection, const LocalPlayer& player) const;
 private:
-    Shader shader;
-    GLuint vao, vbo, texture;
+    Engine::Shader shader;
+    unsigned int vao, vbo, texture;
 };

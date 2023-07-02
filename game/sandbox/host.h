@@ -3,12 +3,18 @@
 #include <stdint.h>
 #include <functional>
 
-#include "sandbox/util/buf.h"
+#include "util/buf.h"
 
-class ServerHost {
-public:
+struct PlayerHost {
 
     typedef uint32_t PeerId;
+
+    virtual void send(PeerId, std::vector<uint8_t>, bool reliable) = 0;
+
+    virtual void broadcast(std::vector<uint8_t>, bool reliable) = 0;
+};
+
+struct ServerHost : public PlayerHost {
 
     virtual void init() = 0;
 
@@ -18,15 +24,14 @@ public:
         std::function<void(PeerId, const ByteBuffer&)> receive
     ) = 0;
 
-    virtual void send(PeerId, std::vector<uint8_t>, bool reliable) = 0;
-
-    virtual void broadcast(std::vector<uint8_t>, bool reliable) = 0;
-
-    virtual ~ServerHost() = default;
+    virtual void close() = 0;
 };
 
-class ClientHost {
-public:
+struct ServerEndpoint {
+    virtual void send(std::vector<uint8_t>, bool reliable) = 0;
+};
+
+struct ClientHost : public ServerEndpoint {
 
     virtual void init() = 0;
 
@@ -36,8 +41,6 @@ public:
             std::function<void(const ByteBuffer&)> receive
     ) = 0;
 
-    virtual void send(std::vector<uint8_t>, bool reliable) = 0;
-
-    virtual ~ClientHost() = default;
+    virtual void close() = 0;
 
 };

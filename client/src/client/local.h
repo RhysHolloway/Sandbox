@@ -48,7 +48,7 @@ public:
         local->push(data);
     };
 
-    ~LocalServerHost() override = default;
+    void close() override { }
 
     LocalServerHost(std::shared_ptr<MessageQueue> localQueue, std::shared_ptr<MessageQueue> remoteQueue) : local{localQueue}, remote{remoteQueue} {}
 
@@ -93,7 +93,7 @@ public:
         local->push(data);
     }
 
-    ~LocalClientHost() override = default;
+    void close() override {}
 
     static std::pair<LocalServerHost, LocalClientHost> create_pair() {
         MessageQueue c, s;

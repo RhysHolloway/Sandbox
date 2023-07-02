@@ -2,23 +2,17 @@
 
 #include <string>
 
-#include <GL/glew.h>
-
 namespace Engine {
 
     class Shader {
 
     public:
+        unsigned int id = 0;
 
-        GLuint id = 0;
+        void from_source(const std::string &vertexSource, const std::string &fragmentSource);
+        void from_files(const std::string &vertexPath, const std::string &fragmentPath);
 
-        void from_source(std::string vertexSource, std::string fragmentSource);
-
-        void from_files(std::string vertexPath, std::string fragmentPath);
-
-        void use() const {
-            glUseProgram(id);
-        }
+        void use() const;
 
 //    ~Shader() {
 //        glDeleteProgram(id);

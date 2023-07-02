@@ -1,0 +1,14 @@
+# Aspose.3D Wavefront OBJ Exporter
+# Copyright 2004-2023 Aspose Pty Ltd.
+# File created: 06/29/2023 17:31:30
+
+newmtl wood
+	Ka 0 0 0
+	Kd 0.58880180120468136 0.49732455611228944 0.98019963502883904
+	Ke 0.58880180120468136 0.49732455611228944 0.98019963502883904
+	illum 2
+	Ks 1 1 1
+	Ns 9.60784313725490336
+	d 1
+	Tr 0
+	map_Kd C:\Users\Orangestar\Downloads\crowbar\Unpacked\wood.png

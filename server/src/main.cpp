@@ -15,7 +15,7 @@
 #include <toml.hpp>
 #include <enet/enet.h>
 
-#include "sandbox/server/server.h"
+#include "sandbox/server.h"
 #include "host.h"
 
 const std::string configFile("config.toml");
@@ -26,7 +26,7 @@ int main() {
 
     plog::init(plog::debug, &consoleAppender);
 
-    PLOGI << "Loading server...";
+    PLOGI << "Loading game...";
 
     if (!std::filesystem::exists(configFile)) {
         PLOGD << "Creating configuration file";
@@ -40,7 +40,7 @@ int main() {
         throw std::runtime_error("Could not initialize ENet!");
     }
 
-    PLOGI << "Starting server...";
+    PLOGI << "Starting game...";
 
     Server<NetHost> server;
 

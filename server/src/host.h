@@ -62,10 +62,10 @@ public:
                     }
                     break;
                 }
-                default: {
-                    // unreachable
-                    std::unreachable();
-                }
+//                default: {
+//                    // unreachable
+//                    std::unreachable();
+//                }
             }
         }
     }
@@ -82,15 +82,15 @@ public:
         enet_host_broadcast(server, 0, packet);
     }
 
-    ~NetHost() override {
-        std::cout << "Destroying server networking host" << std::endl;
-
-        //TODO: disconnect all clients
+    void close() override {
+        for (auto& peer : peers) {
+            enet_peer_disconnect_now(peer.second, ENET_PACKET_FLAG_RELIABLE);
+        }
 
         enet_host_destroy(server);
     }
 
-    uint32_t currentId = 0;
+    uint32_t currentId = 1;
     std::vector<std::pair<ServerHost::PeerId, ENetPeer*>> peers;
     ENetHost *server;
     ENetEvent event;

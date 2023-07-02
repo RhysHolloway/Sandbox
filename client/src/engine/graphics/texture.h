@@ -5,49 +5,26 @@
 #pragma once
 
 #include <string>
-#include <stdexcept>
 
-#include <GL/glew.h>
-#include <lodepng.h>
+namespace Engine {
 
-class Texture {
-public:
-    void load(std::string path) {
-        std::vector<unsigned char> buf;
-        uint32_t width, height;
-        lodepng::decode(buf, width, height, path);
-        load(buf, width, height);
-    }
+    class Texture {
+    public:
+        Texture() = default;
+        Texture(const std::string &path, bool flip);
+        Texture(const std::vector<unsigned char> &data, bool flip);
+        Texture(std::vector<uint8_t> &buf, uint32_t width, uint32_t height, bool flip);
 
-    void load(std::vector<unsigned char> data) {
-        std::vector<unsigned char> buf;
-        uint32_t width, height;
-        lodepng::decode(buf, width, height, data);
-        load(buf, width, height);
-    }
+        void use() const;
 
-    void load(std::vector<uint8_t> buf, uint32_t width, uint32_t height) {
-        glGenTextures(1, &id);
-        this->use();
+        uint32_t getWidth() const;
 
-        if (!buf.empty()) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf.data());
-        } else {
-            throw std::runtime_error("Could not find texture!");
-        }
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
+        uint32_t getHeight() const;
 
-    void use() const {
-        glBindTexture(GL_TEXTURE_2D, id);
-    }
-    uint32_t getWidth() const {
-        return width;
-    }
-    uint32_t getHeight() const {
-        return height;
-    }
-private:
-    GLuint id = 0;
-    uint32_t width = 0, height = 0;
-};
+    private:
+        uint32_t id = 0, width = 0, height = 0;
+
+        void load(std::vector<uint8_t> &buf, bool flip);
+    };
+
+}

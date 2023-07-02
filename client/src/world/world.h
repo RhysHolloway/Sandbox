@@ -1,36 +1,47 @@
 #pragma once
 
-#include "textures.h"
+#include "BS_thread_pool.hpp"
+
 #include "world/skybox/skybox.h"
 #include "chunk/renderer.h"
+#include "entity.h"
 #include "sandbox/util/buf.h"
-#include "sandbox/server/packet.h"
+#include "sandbox/packet.h"
 
 class ClientWorld {
 public:
 
-    void init(Context& ctx) {
-        skybox.init(ctx);
-        textures.init(ctx);
-        chunks.init(ctx, textures);
+    void init() {
+        skybox.init();
+        chunker.init();
+        entities.init();
     }
     
-    void read_packet(PacketHeader header, ByteBuffer buf);
+    void read(ServerPacket header, ByteBuffer buf);
 
-    void update(Context &ctx) {
+    void input(Engine::Window &ctx) {
+        player.input(ctx);
     }
 
-    void render(Context &ctx) {
-        camera.input(ctx);
-        textures.getTexture().use();
-        chunks.render(ctx, camera);
-        skybox.render(ctx, camera);
+    void update(ServerEndpoint &host);
+
+    void render(Engine::Window &window) {
+
+        auto projection = glm::perspective(glm::radians(70.f), window.getScale(), 0.01f, 100.0f);
+        chunker.render(projection, player);
+        skybox.render(projection, player);
+        entities.render(projection, player, players);
     }
 
 private:
-    Camera camera;
-    WorldTextures textures;
+    LocalPlayer player;
+    std::unordered_map<ChunkPos, Chunk> chunks;
+    std::unordered_map<uint32_t, RemotePlayer> players;
+
+    BS::thread_pool pool;
+
+
     Skybox skybox;
-    ChunkRenderer chunks;
-    WorldPlayer player;
+    ChunkRenderer chunker;
+    EntityRenderer entities;
 };

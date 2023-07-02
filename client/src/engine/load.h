@@ -6,7 +6,7 @@
 
 namespace util {
 
-    std::string read_to_string(std::string path) {
+    std::string read_to_string(const std::string &path) {
         std::ifstream file;
         file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         file.open(path);

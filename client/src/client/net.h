@@ -16,7 +16,7 @@ public:
     }
 
     //TODO: fix waiting (use async), and return an enum if the client successfully connects OR entered an invalid hostname
-    bool connect(std::string hostname) {
+    bool connect(const std::string& hostname) {
 
         auto loc = hostname.find(':');
         if (loc == hostname.length()) {
@@ -58,23 +58,26 @@ public:
         enet_peer_send(server, 0, packet);
     }
 
-    void update(std::function<void(std::vector<uint8_t>)> packet) {
+    void process(
+            std::function<void()> connect,
+            std::function<void()> disconnect,
+            std::function<void(const ByteBuffer&)> receive
+    ) override {
         ENetEvent event;
-        while(enet_host_service(host, &event, 17) > 0) {
-            std::cout << "received event" << std::endl;
+        while(enet_host_service(host, &event, 0) > 0) {
             switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT: {
-                    std::cout << "connected!" << std::endl;
+                    connect();
                     break;
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
-                    std::vector data(event.packet->data, event.packet->data + event.packet->dataLength);
-                    packet(data);
+                    ByteBuffer buf{event.packet->data, event.packet->dataLength};
+                    receive(buf);
                     enet_packet_destroy(event.packet);
                     break;
                 }
                 case ENET_EVENT_TYPE_DISCONNECT: {
-                    std::cout << "disconnected!" << std::endl;
+                    disconnect();
                     break;
                 }
                 default: {
@@ -84,9 +87,13 @@ public:
         }
     }
 
-    ~ClientNetHost() override {
-        std::cout << "Dropping enet client host" << std::endl;
-        enet_peer_disconnect(server, 0);
+    void send(std::vector<uint8_t> data, bool reliable) override {
+        auto packet = enet_packet_create(data.data(), data.size(), reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+        enet_peer_send(server, 0, packet);
+    }
+
+    void close() override {
+        enet_peer_disconnect_now(server, 0);
         enet_host_flush(host);
         enet_host_destroy(host);
     }
