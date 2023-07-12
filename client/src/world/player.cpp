@@ -40,9 +40,9 @@ void LocalPlayer::input(Window &window) {
 
     position.velocity = direction == ZERO ? ZERO : glm::normalize(direction) * controller.speed;
 
-    if (window.key_pressed(Key::LEFT_SHIFT)) {
+    if (window.key_pressed(Key::LEFT_CONTROL)) {
         controller.speed = 32.4f;
-    } else if (window.key_released(Key::LEFT_SHIFT)) {
+    } else if (window.key_released(Key::LEFT_CONTROL)) {
         controller.speed = 8.1f;
     }
 

@@ -1,0 +1,16 @@
+[air]
+id = 0
+solid = false
+transparent = true
+
+[stone]
+id = 1
+
+[grass]
+id = 2
+
+[dirt]
+id = 3
+
+[brick]
+id = 4

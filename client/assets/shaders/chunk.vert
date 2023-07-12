@@ -1,4 +1,4 @@
-#version 410 core
+#version 430 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 aUV;
@@ -8,7 +8,7 @@ out vec2 uv;
 out vec3 normal;
 out vec3 light;
 
-uniform mat4 camera;
+layout (location = 0) uniform mat4 camera;
 uniform ivec3 relativeChunkPos;
 
 vec3 get_normal(uint i) {

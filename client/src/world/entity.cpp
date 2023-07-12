@@ -3,20 +3,17 @@
 #include "../engine/OBJ_Loader.h"
 
 void EntityRenderer::init() {
-    auto fs = cmrc::sandbox::get_filesystem();
+    auto fs = cmrc::client::get_filesystem();
     auto v = fs.open("shaders/entity.vert"), f = fs.open("shaders/entity.frag"), t = fs.open("textures/kanye.png");
-    Engine::Shader shader{};
-    shader.from_source(std::string{v.begin(), v.end()}, std::string{f.begin(), f.end()});
+    Engine::Shader shader{std::string{v.begin(), v.end()}, std::string{f.begin(), f.end()}, "entity"};
     objl::Loader l{};
     if (!l.LoadFile("models/kanye.obj"))
         throw std::runtime_error("Could not load player model!");
 
-    assert(shader.id != 0);
-
     Engine::Texture texture{std::vector<unsigned char>{t.begin(), t.end()}, true};
 //    std::vector<Engine::Texture> textures{texture};
 
-    playerMesh.init(shader, reinterpret_cast<std::vector<MeshVertex>&>(l.LoadedVertices), l.LoadedIndices, texture);
+    playerMesh = Mesh(std::move(shader), std::move(texture), reinterpret_cast<std::vector<MeshVertex>&>(l.LoadedVertices), l.LoadedIndices);
 }
 
 void EntityRenderer::render(const glm::mat4 &projection, const LocalPlayer &player, const std::unordered_map<uint32_t, RemotePlayer> &players) {

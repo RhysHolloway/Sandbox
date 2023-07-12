@@ -25,13 +25,16 @@ void debugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsize
 #define SKIP (1.0 / (float) UPS)
 
 template <class Host> requires CheckType<Host, ClientHost>
-class GameClient {
+class WorldClient {
 public:
 
-    GameClient(const Host& h) : host{ std::move(h) } { }
+//    WorldClient(const Host& h) : host{ std::move(h) } { }
 
-    void init() {
+    void init_host(std::function<void(Host&)> hostInit) {
+        hostInit(host);
+    };
 
+    void init_graphics() {
         window.init(GAME_TITLE, 1280, 720);
         window.make_current();
         gl::init();
@@ -45,8 +48,14 @@ public:
 
         glEnable(GL_DEPTH_TEST);
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    void init_world(std::shared_ptr<WorldData>& data) {
+        world.init_data(data);
         world.init();
-    };
+    }
 
     void run() {
 
@@ -58,37 +67,41 @@ public:
         float interpolation;
 
         while (running) {
-
-            input();
-
-            host.process(
-                    [this]() { /* CLIENT EATS HOST CONNECT IN ENET CODE */ },
-                    [&running]() {
-                        running = false;
-                    },
-                    [this](const ByteBuffer& buf) { receive(buf); }
-            );
-
-            loops = 0;
-            while (glfwGetTime() > gameTime && MAX_FRAMESKIP > loops) {
-                update();
-                gameTime += SKIP;
-                loops++;
-            }
-
-            interpolation = (float) (glfwGetTime() + SKIP - gameTime) / SKIP;
-            render(interpolation);
-            window.present();
-
-            glfwPollEvents();
-            if (glfwWindowShouldClose(window.context)) {
-
-                running = false;
-            }
-
+            loop(running, gameTime, loops, interpolation);
         }
 
+        std::cout << "closing client" << std::endl;
+
         host.close();
+    }
+
+    void loop(bool &running, double &gameTime, uint32_t &loops, float &interpolation) {
+        input();
+
+        host.process(
+                [this]() { /* CLIENT EATS HOST CONNECT IN ENET CODE */ },
+                [&running]() {
+                    running = false;
+                },
+                [this](const ByteBuffer& buf) { receive(buf); }
+        );
+
+        loops = 0;
+        while (glfwGetTime() > gameTime && MAX_FRAMESKIP > loops) {
+            update();
+            gameTime += SKIP;
+            loops++;
+        }
+
+        interpolation = (float) (glfwGetTime() + SKIP - gameTime) / SKIP;
+        render(interpolation);
+        window.present();
+
+        glfwPollEvents();
+        if (glfwWindowShouldClose(window.context)) {
+
+            running = false;
+        }
     }
 
     void on_connect() {
@@ -96,7 +109,7 @@ public:
     }
 
     void receive(const ByteBuffer& buf) {
-        ServerPacket header = static_cast<ServerPacket>(buf.getByte());
+        auto header = static_cast<ServerPacket::ServerPacket>(buf.getByte());
         world.read(header, buf);
     }
 

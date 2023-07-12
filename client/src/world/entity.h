@@ -1,12 +1,9 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "engine/graphics/mesh.h"
 #include "player.h"
-
-//#include <cmrc/cmrc.hpp>
-
-//CMRC_DECLARE(sandbox);
-
 
 class EntityRenderer {
 public:

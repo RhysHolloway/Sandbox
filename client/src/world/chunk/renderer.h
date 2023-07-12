@@ -11,6 +11,7 @@
 
 #include "../player.h"
 #include "mesh/mesh.h"
+#include "world/voxel.h"
 
 struct ClientChunk {
     ChunkMesh mesh;
@@ -32,12 +33,11 @@ public:
         }
     }
 
-    void remesh(BS::thread_pool& pool, ChunkPos pos, Chunk &chunk);
+    void remesh(const VoxelRegistry&, BS::thread_pool&, ChunkPos pos, Chunk &chunk);
 
     void render(const glm::mat4& projection, const LocalPlayer& player);
 private:
-    Engine::Texture voxels;
-    Engine::Shader chunkShader;
+    ClientVoxelData voxels;
     uint8_t renderDistance = 8;
     std::unordered_map<ChunkPos, ClientChunk> chunks;
 };

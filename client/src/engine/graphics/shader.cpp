@@ -7,9 +7,10 @@
 #include <GL/glew.h>
 
 #include "../load.h"
+#include "sandbox/util.h"
 #include "shader.h"
 
-void Engine::Shader::from_source(const std::string &vertexSource, const std::string &fragmentSource) {
+Engine::Shader::Shader(const std::string &vertexSource, const std::string &fragmentSource, const char *name) {
     const char *vShaderCode = vertexSource.c_str();
     const char *fShaderCode = fragmentSource.c_str();
     // 2. compile shaders
@@ -40,7 +41,7 @@ void Engine::Shader::from_source(const std::string &vertexSource, const std::str
     };
 
     // shader Program
-    id = glCreateProgram();
+    auto id = glCreateProgram();
     glAttachShader(id, vertex);
     glAttachShader(id, fragment);
     glLinkProgram(id);
@@ -54,12 +55,26 @@ void Engine::Shader::from_source(const std::string &vertexSource, const std::str
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
-}
 
-void Engine::Shader::from_files(const std::string &vertexPath, const std::string &fragmentPath) {
-    from_source(util::read_to_string(vertexPath), util::read_to_string(fragmentPath));
+    LOGGER << "Created shader #" << id << ", \"" << name << "\"" << std::endl;
+
+    ID = id;
+//    inner = std::make_shared<Engine::Shader::ShaderId>(ShaderId{id});
 }
 
 void Engine::Shader::use() const {
-    glUseProgram(id);
-};
+    glUseProgram(id());
+}
+
+unsigned int Engine::Shader::id() const noexcept {
+    return ID;
+}
+
+int Engine::Shader::uniform_location(const std::string &name) {
+    return glGetUniformLocation(id(), name.c_str());
+}
+
+//Engine::Shader::ShaderId::~ShaderId() {
+//    LOGGER << "Deleted shader #" << id << std::endl;
+//    glDeleteProgram(id);
+//}

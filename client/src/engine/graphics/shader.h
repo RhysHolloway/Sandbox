@@ -7,16 +7,22 @@ namespace Engine {
     class Shader {
 
     public:
-        unsigned int id = 0;
 
-        void from_source(const std::string &vertexSource, const std::string &fragmentSource);
-        void from_files(const std::string &vertexPath, const std::string &fragmentPath);
+        Shader() = default;
+        Shader(const std::string &vertexData, const std::string &fragmentData, const char *name);
 
         void use() const;
 
-//    ~Shader() {
-//        glDeleteProgram(id);
-//    }
+        int uniform_location(const std::string& name);
 
+//        Shader& operator=(const Shader& shader) = delete;
+
+    private:
+
+//        Shader(const Shader& shader) = delete;
+        inline unsigned int id() const noexcept;
+//        struct ShaderId {
+        unsigned int ID = 0;
     };
+
 }

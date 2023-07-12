@@ -32,7 +32,7 @@ public:
     }
 private:
     std::mutex mutex{};
-    std::deque<T> deque;
+    std::deque<T> deque{};
 };
 
 template<typename T>

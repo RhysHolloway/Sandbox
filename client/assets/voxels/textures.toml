@@ -1,0 +1,23 @@
+[shaders.chunk]
+vert = "chunk.vert"
+frag = "chunk.frag"
+
+[textures.atlas]
+path = "atlas.png"
+#shader = "chunk"
+
+[voxels.stone]
+textures = ["atlas"]
+sides = 1
+
+[voxels.grass]
+textures = ["atlas"]
+sides = { top = 0, bottom = 2, default = 3 }
+
+[voxels.dirt]
+textures = ["atlas"]
+sides = 2
+
+[voxels.brick]
+textures = ["atlas"]
+sides = 7

@@ -17,7 +17,7 @@ struct CameraInput {
 class LocalPlayer {
 public:
     uint32_t id;
-    PlayerPosition position = PlayerPosition(ChunkPos(0), LocalPos(0.f));
+    PlayerPosition position = PlayerPosition(ChunkPos(0), Chunk::LocalPos(0.f));
     CameraInput controller;
 
     void input(Engine::Window &window);

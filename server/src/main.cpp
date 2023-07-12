@@ -6,14 +6,13 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
-#include <set>
+#include <filesystem>
 
 #include <plog/Log.h>
 #include <plog/Init.h>
 #include <plog/Appenders/ConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <toml.hpp>
-#include <enet/enet.h>
 
 #include "sandbox/server.h"
 #include "host.h"
@@ -30,21 +29,21 @@ int main() {
 
     if (!std::filesystem::exists(configFile)) {
         PLOGD << "Creating configuration file";
-        std::ofstream(configFile) << "port = 25555" << std::endl;
+        std::ofstream(configFile) << "port = 28211" << std::endl;
     }
 
     auto data = toml::parse(configFile);
     auto port = toml::find<uint16_t>(data, "port");
 
-    if (enet_initialize()) {
-        throw std::runtime_error("Could not initialize ENet!");
-    }
-
     PLOGI << "Starting game...";
 
     Server<NetHost> server;
 
-    server.init();
+    server.init([port](auto &host) {
+        host.init(port);
+    }, [](auto &wdata) {
+        wdata.voxels.init();
+    });
 
     auto commands = server.get_command_queue();
 

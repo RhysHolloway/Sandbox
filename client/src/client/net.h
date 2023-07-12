@@ -3,17 +3,14 @@
 #include <string>
 #include <format>
 #include <stdexcept>
-#include <enet/enet.h>
+#define ENET_IMPLEMENTATION
+#include <enet.h>
 #include <iostream>
 
 #include "sandbox/host.h"
 
-class ClientNetHost : public ClientHost {
+class NetHost : public ClientHost {
 public:
-
-    void init() override {
-        throw std::runtime_error("finish writing client net host!");
-    }
 
     //TODO: fix waiting (use async), and return an enum if the client successfully connects OR entered an invalid hostname
     bool connect(const std::string& hostname) {
@@ -35,9 +32,9 @@ public:
             throw std::runtime_error("Could not create enet client host!");
         }
 
-        ENetAddress address;
+        ENetAddress address = { 0 };
         enet_address_set_host(&address, "127.0.0.1");//hostname.c_str());
-        address.port = 25555;
+        address.port = 28211;
 
         server = enet_host_connect(host, &address, 2, 0);
         if (!server) {
@@ -45,7 +42,7 @@ public:
         }
 
         ENetEvent event;
-        if (enet_host_service(host, &event, 1000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
+        if (enet_host_service(host, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
             return true;
         } else {
             enet_peer_reset(server);
@@ -96,9 +93,10 @@ public:
         enet_peer_disconnect_now(server, 0);
         enet_host_flush(host);
         enet_host_destroy(host);
+        enet_deinitialize();
     }
 
 private:
-    ENetHost* host;
-    ENetPeer* server;
+    ENetHost* host = {0};
+    ENetPeer* server = { 0 };
 };

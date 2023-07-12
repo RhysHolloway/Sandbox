@@ -19,10 +19,12 @@ template <class Host> requires CheckType<Host, ServerHost>
 class Server {
 public:
 
-//    Server(Host h) : host{h} {}
+    void init_host(const std::function<void(Host&)>& hostInit) {
+        hostInit(host);
+    }
 
-    void init() {
-        host.init();
+    void init_world(std::shared_ptr<WorldData>& data) {
+        world.data = data;
         world.init();
     }
 
@@ -76,6 +78,8 @@ public:
 
         }
 
+        LOGGER << "closing server" << std::endl;
+
         host.close();
 
     }
@@ -98,9 +102,9 @@ public:
     }
 
     void receive(ServerHost::PeerId p, const ByteBuffer& buf) {
-        ClientPacket packet = static_cast<ClientPacket>(buf.getByte());
+        auto packet = static_cast<ClientPacket::ClientPacket>(buf.getByte());
         switch(packet) {
-            case Authenticate:
+            case ClientPacket::Authenticate:
                 world.connect(host, p);
                 break;
             default:
@@ -109,7 +113,7 @@ public:
         }
     }
 
-    [[nodiscard]] std::shared_ptr<Queue<std::string>> get_command_queue() const noexcept {
+    [[nodiscard]] const std::shared_ptr<Queue<std::string>>& get_command_queue() const noexcept {
         return command_queue;
     }
 
@@ -117,7 +121,7 @@ public:
 private:
     Host host;
     bool running = true;
-    std::shared_ptr<Queue<std::string>> command_queue = std::make_shared<Queue<std::string>>();
+    std::shared_ptr<Queue<std::string>> command_queue{new Queue<std::string>{}};
 
     World world;
 };

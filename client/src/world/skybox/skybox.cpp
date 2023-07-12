@@ -3,9 +3,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <lodepng.h>
 #include <cmrc/cmrc.hpp>
-CMRC_DECLARE(sandbox);
+CMRC_DECLARE(client);
 
 #include "skybox.h"
+
+#define CAMERA_LOCATION 0
+#define TEXTURE_LOCATION 1
 
 void Skybox::init() {
 
@@ -54,14 +57,14 @@ void Skybox::init() {
             1.0f, -1.0f,  1.0f
     };
 
-    auto fs = cmrc::sandbox::get_filesystem();
+    auto fs = cmrc::client::get_filesystem();
     auto vert = fs.open("shaders/skybox.vert");
     auto frag = fs.open("shaders/skybox.frag");
 
-    shader.from_source(std::string(vert.begin(), vert.end()), std::string(frag.begin(), frag.end()));
+    shader = Engine::Shader{std::string(vert.begin(), vert.end()), std::string(frag.begin(), frag.end()), "skybox"};
     shader.use();
 
-    glUniform1i(glGetUniformLocation(shader.id, "skybox"), 0);
+    glUniform1i(TEXTURE_LOCATION, 0);
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -107,7 +110,7 @@ void Skybox::render(const glm::mat4& projection, const LocalPlayer& player) cons
     shader.use();
 
     glm::mat4 camera = projection * glm::mat4(glm::mat3(player.position.view()));
-    glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(camera));
+    glUniformMatrix4fv(CAMERA_LOCATION, 1, GL_FALSE, glm::value_ptr(camera));
 
     glBindVertexArray(vao);
     glActiveTexture(GL_TEXTURE0);

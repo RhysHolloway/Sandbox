@@ -29,12 +29,10 @@
 // If defined, places the class into a namespace called bb
 //#define BB_USE_NS
 
-#include <cstdlib>
 #include <cstdint>
 #include <cstring>
 
 #include <vector>
-#include <memory>
 
 #include <glm/glm.hpp>
 

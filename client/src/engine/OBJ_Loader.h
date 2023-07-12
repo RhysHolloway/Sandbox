@@ -9,7 +9,7 @@
 #include <math.h>
 
 #include <cmrc/cmrc.hpp>
-CMRC_DECLARE(sandbox);
+CMRC_DECLARE(client);
 
 // Print progress to console while loading (large models)
 //#define OBJL_CONSOLE_OUTPUT
@@ -428,7 +428,7 @@ namespace objl
 //			if (Path.substr(Path.size() - 4, 4) != ".obj")
 //				return false;
 
-            auto fs = cmrc::sandbox::get_filesystem();
+            auto fs = cmrc::client::get_filesystem();
 
             std::istringstream file;
             try {

@@ -1,21 +1,30 @@
 #pragma once
 
-#include <unordered_map>
+#include <functional>
 
-#define GLM_ENABLE_EXPERIMENTAL
-
+#include "voxel/registry.h"
 #include "chunk.h"
 #include "player.h"
-#include "../host.h"
 #include "../packet.h"
+
+struct WorldData {
+    VoxelRegistry voxels;
+};
+
+struct WorldState {
+    std::unordered_map<uint32_t, WorldPlayer> players{};
+    std::unordered_map<ChunkPos, Chunk> chunks{};
+};
+
+struct PlayerHost;
 
 class World {
 
 public:
 
-    void init() {
-        generate_default_chunks();
-    }
+    static std::shared_ptr<WorldData> create_data();
+
+    void init();
 
     void update(PlayerHost &host);
 
@@ -24,11 +33,12 @@ public:
 
     void disconnect(PlayerHost &host, uint32_t id);
 
-    void receive(PlayerHost &host, uint32_t id, ClientPacket packet, const ByteBuffer &buf);
+    void receive(PlayerHost &host, uint32_t id, ClientPacket::ClientPacket packet, const ByteBuffer &buf);
 
-    void generate_default_chunks();
+    std::shared_ptr<WorldData> data;
 
 private:
-    std::unordered_map<uint32_t, WorldPlayer> players;
-    std::unordered_map<ChunkPos, Chunk> chunks;
+    void generate_default_chunks();
+
+    WorldState state;
 };

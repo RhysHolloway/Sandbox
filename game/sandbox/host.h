@@ -16,8 +16,6 @@ struct PlayerHost {
 
 struct ServerHost : public PlayerHost {
 
-    virtual void init() = 0;
-
     virtual void process(
         std::function<void(PeerId)> connect,
         std::function<void(PeerId)> disconnect,
@@ -32,8 +30,6 @@ struct ServerEndpoint {
 };
 
 struct ClientHost : public ServerEndpoint {
-
-    virtual void init() = 0;
 
     virtual void process(
             std::function<void()> connect,

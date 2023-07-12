@@ -16,6 +16,8 @@ struct MeshVertex {
     glm::vec2 TexCoords;
 };
 
+#define CAMERA_LOCATION 0
+
 class Mesh {
 private:
     //  render data
@@ -33,7 +35,10 @@ public:
 //    std::vector<GLuint> indices;
 //    std::vector<Texture>      textures;
 
-    void init(Engine::Shader &shader, std::vector<MeshVertex>& vertices, std::vector<unsigned int>& indices, Engine::Texture& textures) {
+    Mesh() = default;
+
+    Mesh(Engine::Shader&& shader, Engine::Texture&& textures, const std::vector<MeshVertex>& vertices, const std::vector<unsigned int>& indices) noexcept : s{shader}, t{textures} {
+//        this->s
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
@@ -59,24 +64,20 @@ public:
 
         glBindVertexArray(0);
 
-        glUniform1i(glGetUniformLocation(shader.id, "tex"), 0);
+        glUniform1i(s.uniform_location("tex"), 0);
 
         this->indices = indices.size();
-        this->s = shader;
-        this->t = textures;
     };
 
     void update_camera(const glm::mat4& camera) {
         s.use();
-        auto c = glGetUniformLocation(s.id, "camera");
-        assert (c != -1);
-        glUniformMatrix4fv(c, 1, GL_FALSE, glm::value_ptr(camera));
+        glUniformMatrix4fv(CAMERA_LOCATION, 1, GL_FALSE, glm::value_ptr(camera));
     }
 
 
     void render(const glm::mat4& model) {
         s.use();
-        glUniformMatrix4fv(glGetUniformLocation(s.id, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(s.uniform_location("model"), 1, GL_FALSE, glm::value_ptr(model));
 
 
 //        for(unsigned int i = 0; i < textures.size(); i++)

@@ -7,15 +7,9 @@ bool PlayerPosition::update() {
 //        return false;
 
     auto realPos = velocity * (1.f / 25.f) + local;
-    auto cDiff = glm::ivec3(realPos) / CHUNK_SIZE;
-    if (cDiff != glm::zero<glm::ivec3>()) {
-        chunk += cDiff;
-        auto l = realPos - 16.f * glm::floor(realPos / 16.f);;
-//        std::cout << glm::to_string(realPos) << ", new: " << glm::to_string(l) << std::endl;
-        local = l;
-    } else {
-        local = realPos;
-    }
+//    auto cDiff = glm::ivec3(realPos) / CHUNK_SIZE;
+//    chunk += cDiff;
+    local = realPos;// - glm::vec3(cDiff * CHUNK_SIZE);
 
     return true;
 }

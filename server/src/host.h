@@ -1,10 +1,10 @@
 #pragma once
 
-#include <stdint.h>
 #include <functional>
 #include <stdexcept>
-#include <enet/enet.h>
-#include <iostream>
+
+#define ENET_IMPLEMENTATION
+#include <enet.h>
 
 #include "sandbox/host.h"
 #include "sandbox/util/buf.h"
@@ -12,25 +12,18 @@
 class NetHost : public ServerHost {
 public:
 
-//    class NetPeer : public Peer {
-//    public:
-//
-//        NetPeer(ENetPeer * p) : ptr{p} {}
-//
-//        std::string username() override {
-//            return "Jobs";
-//        }
-//
-//        ENetPeer *ptr;
-//    };
+    void init(uint16_t port) {
 
-    void init() override {
-        ENetAddress address;
+        if (enet_initialize()) {
+            throw std::runtime_error("Could not initialize ENet!");
+        }
+
+        ENetAddress address = {0};
         address.host = ENET_HOST_ANY;
-        address.port = 25555;//this->port;
+        address.port = port;//this->port;
 
         server = enet_host_create(&address, 32, 2, 0, 0);
-        if (!server)
+        if (server == NULL)
             throw std::runtime_error("Could not create host!");
     };
 
@@ -39,7 +32,7 @@ public:
         std::function<void(PeerId)> disconnect,
         std::function<void(PeerId, const ByteBuffer&)> receive
     ) override {
-        while(enet_host_service(server, &event, 17) > 0) {
+        while(enet_host_service(server, &event, 0) > 0) {
             ENetPeer *p = event.peer;
             switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT: {

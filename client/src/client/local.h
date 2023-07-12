@@ -1,42 +1,50 @@
 #pragma once
 
+#include <utility>
+
 #include "sandbox/util/queue.h"
 #include "sandbox/util/buf.h"
 
 #include "sandbox/host.h"
+#include "sandbox/server.h"
 
 typedef Queue<std::vector<uint8_t>> MessageQueue;
 
 class LocalServerHost : public ServerHost {
 public:
 
-    void init() override {
-
-    };
-
     void process(
             std::function<void(PeerId)> connect,
             std::function<void(PeerId)> disconnect,
-            std::function<void(PeerId, const ByteBuffer&)> receive
+            std::function< void(PeerId, const ByteBuffer &)> receive
     ) override {
-        if(shouldConnect) {
+        if (shouldConnect) {
             shouldConnect = false;
             connect(0);
         }
 
         std::optional<std::vector<uint8_t>> message;
-        while(true) {
+        while (true) {
             message = remote->pop();
-            if(message)
-                receive(0, ByteBuffer{message->data(), message->size()});
+            if (message)
+                receive(0, ByteBuffer{
+                        message->
+
+                                data(), message
+
+                                ->
+
+                                        size()
+
+                });
             else break;
         }
 
-        if(shouldDisconnect) {
+        if (shouldDisconnect) {
             shouldDisconnect = false;
             disconnect(0);
         }
-    };
+    }
 
     void send(PeerId id, std::vector<uint8_t> data, bool) override {
         if (id)
@@ -48,9 +56,12 @@ public:
         local->push(data);
     };
 
-    void close() override { }
+    void close() override {}
 
-    LocalServerHost(std::shared_ptr<MessageQueue> localQueue, std::shared_ptr<MessageQueue> remoteQueue) : local{localQueue}, remote{remoteQueue} {}
+    void init(const std::shared_ptr<MessageQueue> &localQueue, const std::shared_ptr<MessageQueue> &remoteQueue) {
+        local = localQueue;
+        remote = remoteQueue;
+    }
 
 private:
 
@@ -58,32 +69,28 @@ private:
     std::shared_ptr<MessageQueue> local, remote;
 };
 
-class LocalClientHost : public ClientHost {
+class LocalHost : public ClientHost {
 public:
-
-    void init() override {
-
-    }
 
     void process(
             std::function<void()> connect,
             std::function<void()> disconnect,
-            std::function<void(const ByteBuffer&)> receive
+            std::function<void(const ByteBuffer &)> receive
     ) override {
-        if(shouldConnect) {
+        if (shouldConnect) {
             shouldConnect = false;
             connect();
         }
 
         std::optional<std::vector<uint8_t>> message;
-        while(true) {
+        while (true) {
             message = remote->pop();
-            if(message)
+            if (message)
                 receive(ByteBuffer{message->data(), message->size()});
             else break;
         }
 
-        if(shouldDisconnect) {
+        if (shouldDisconnect) {
             shouldDisconnect = false;
             disconnect();
         }
@@ -93,20 +100,29 @@ public:
         local->push(data);
     }
 
-    void close() override {}
+    void close() override {
+        auto q = server->get_command_queue();
+        q->push("exit");
+        serverThread.join();
+    }
 
-    static std::pair<LocalServerHost, LocalClientHost> create_pair() {
-        MessageQueue c, s;
-        std::shared_ptr<MessageQueue> client{new MessageQueue {}}, server{new MessageQueue {}};
-        LocalClientHost clientHost{client, server};
-        LocalServerHost serverHost{server, client};
-        return std::make_pair(serverHost, clientHost);
+    void init(std::shared_ptr<WorldData>& data) {
+        auto &l = local, &r = remote;
+        server->init_host([&l, &r](auto &host) {
+            host.init(r, l);
+        });
+        server->init_world(data);
+        auto &s = server;
+        serverThread = std::thread{
+            [s]() {
+                s->run();
+            }
+        };
     }
 
 private:
-
-    LocalClientHost(std::shared_ptr<MessageQueue> localQueue, std::shared_ptr<MessageQueue> remoteQueue) : local{localQueue}, remote{remoteQueue} {}
-
     bool shouldConnect = true, shouldDisconnect = false;
-    std::shared_ptr<MessageQueue> local, remote;
+    std::shared_ptr<MessageQueue> local{new MessageQueue{}}, remote{new MessageQueue{}};
+    std::shared_ptr<Server<LocalServerHost>> server{new Server<LocalServerHost>{}};
+    std::thread serverThread;
 };
