@@ -10,7 +10,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(toml11 REQUIRED)
 find_package(CMakeRC CONFIG REQUIRED)
 
-add_subdirectory(libs/FastNoiseLite)
+include_directories(${CMAKE_SOURCE_DIR}/libs/FastNoiseLite)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/sandbox")
 file(GLOB_RECURSE PROJECT_SOURCES sandbox/*.cpp)
@@ -21,4 +21,4 @@ cmrc_add_resource_library(sandbox-resources ALIAS sandbox::rc NAMESPACE sandbox 
 
 add_library(${PROJECT_NAME} ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC sandbox::rc glm::glm FastNoiseLite toml11::toml11) # Tracy::TracyClient
+target_link_libraries(${PROJECT_NAME} PUBLIC sandbox::rc glm::glm toml11::toml11) # Tracy::TracyClient

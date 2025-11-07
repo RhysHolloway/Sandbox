@@ -1,5 +1,9 @@
 #include <random>
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
 #include <glm/gtx/hash.hpp>
 
 #include "../util.h"

@@ -1,6 +1,8 @@
 //
 // Created by Rhys on 6/17/2023.
-//
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
 
 #include <string>
 #include <iostream>
@@ -33,15 +35,19 @@ int main() {
     }
 
     auto data = toml::parse(configFile);
-    auto port = toml::find<uint16_t>(data, "port");
+    uint16_t port = toml::find<uint16_t>(data, "port");
 
     PLOGI << "Starting game...";
 
     Server<NetHost> server;
 
-    server.init([port](auto &host) {
+    server.init_host([port](NetHost& host) {
         host.init(port);
-    }, [](auto &wdata) {
+    });
+
+    WorldData data();
+
+    server.init_world([](auto &wdata) {
         wdata.voxels.init();
     });
 

@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <vector>
 #include <GL/glew.h>
-#include <lodepng.h>
+#include "lodepng.h"
 #include <algorithm>
 #include <iostream>
 

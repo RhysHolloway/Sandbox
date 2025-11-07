@@ -1,9 +1,12 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include "chunk.h"
-#include "../util.h"
 
 struct PlayerPosition {
+
+
+
     ChunkPos chunk;
     Chunk::LocalPos local;
     glm::vec3 orientation;

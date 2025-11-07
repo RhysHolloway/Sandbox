@@ -1,6 +1,11 @@
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
+#include "player.h"
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include "player.h"
 
 bool PlayerPosition::update() {
 //    if (velocity == ZERO)

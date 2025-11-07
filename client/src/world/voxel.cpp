@@ -46,13 +46,13 @@ void ClientVoxelData::init() {
         auto map_pair = voxels.emplace(pair.first, VoxelSideTexture{});
         auto &sides = map_pair.first->second;
         if (sideValue.is_table()) {
-            for (auto side : sideValue.as_table()) {
-                if (side.first == "bottom") {
-                    sides.bottom = std::make_optional((uint16_t) side.second.as_integer());
-                } else if (side.first == "top") {
-                    sides.top = std::make_optional((uint16_t) side.second.as_integer());
-                } else if (side.first == "default") {
-                    sides.other = std::make_optional((uint16_t) side.second.as_integer());
+            for (auto [fst, snd] : sideValue.as_table()) {
+                if (fst == "bottom") {
+                    sides.bottom = std::make_optional(static_cast<uint16_t>(snd.as_integer()));
+                } else if (fst == "top") {
+                    sides.top = std::make_optional(static_cast<uint16_t>(snd.as_integer()));
+                } else if (fst == "default") {
+                    sides.other = std::make_optional(static_cast<uint16_t>(snd.as_integer()));
                 } else {
                 throw std::runtime_error("Could not decode voxel side for " + pair.first);
                 }

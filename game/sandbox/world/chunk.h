@@ -8,9 +8,7 @@
 #include <mutex>
 
 #include <glm/glm.hpp>
-
 #include "../util/buf.h"
-
 #include "voxel.h"
 
 // 8 subdivisions
@@ -24,17 +22,13 @@ public:
     using glm::ivec3::operator=, glm::ivec3::operator-=, glm::ivec3::operator+=, glm::ivec3::operator*=, glm::ivec3::operator/=, glm::ivec3::operator%=;
 
     ChunkPos() = default;
-    ChunkPos(int i) : vec(i) { }
-    ChunkPos(int x, int y, int z) : vec(x, y, z) {}
-    ChunkPos(glm::ivec3 v) : vec(v) {}
+    ChunkPos(int i);
+    ChunkPos(int x, int y, int z);
+    ChunkPos(glm::ivec3 v);
 
-    void serialize(ByteBuffer& buf) const {
-        buf.putIVec3(*this);
-    }
+    void serialize(ByteBuffer& buf) const;
 
-    static ChunkPos deserialize(const ByteBuffer& buf) {
-        return {buf.getSInt(), buf.getSInt(), buf.getSInt()};
-    }
+    static ChunkPos deserialize(const ByteBuffer& buf);
 
 };
 
@@ -60,18 +54,11 @@ public:
 
     std::unique_ptr<std::mutex> lock{new std::mutex};
 
-    VoxelID& voxelAt(const VoxelPos &loc) {
-        return voxels[loc.x + loc.y * CHUNK_SIZE + loc.z * CHUNK_SIZE * CHUNK_SIZE];
-    }
+    VoxelID& voxelAt(const VoxelPos &loc);
 
     //TODO: compress chunk in xzy format
-    void serialize(ByteBuffer& buf) {
-        buf.putBytes(reinterpret_cast<uint8_t*>(this->voxels.data()), CHUNK_VOLUME * (sizeof(VoxelID) / sizeof(uint8_t)));
-    }
-
-    void deserialize(ByteBuffer& buf) {
-        buf.getBytes(reinterpret_cast<uint8_t *>(this->voxels.data()), CHUNK_VOLUME * (sizeof(VoxelID) / sizeof(uint8_t)));
-    }
+    void serialize(ByteBuffer& buf);
+    void deserialize(ByteBuffer& buf);
 
 //private:
 //

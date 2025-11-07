@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <lodepng.h>
+#include "lodepng.h"
 #include <cmrc/cmrc.hpp>
 CMRC_DECLARE(client);
 

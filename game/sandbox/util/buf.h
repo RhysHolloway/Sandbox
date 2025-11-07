@@ -31,10 +31,8 @@
 
 #include <cstdint>
 #include <cstring>
-
 #include <vector>
-
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
 
 #ifdef BB_UTILITY
 #include <iostream>

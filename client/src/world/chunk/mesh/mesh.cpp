@@ -2,6 +2,7 @@
 // Created by Rhys on 6/16/2023.
 //
 
+#include <glm/glm.hpp>
 #include "mesh.h"
 
 ChunkMesh::ChunkMesh() {

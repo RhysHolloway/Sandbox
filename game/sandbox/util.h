@@ -4,7 +4,7 @@
 
 #pragma once
 
-#define GAME_TITLE "Sandboxington"
+#define GAME_TITLE "SandboxGLTest"
 
 #define UPS 25
 

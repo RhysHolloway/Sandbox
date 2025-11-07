@@ -1,13 +1,15 @@
 #include "entity.h"
 
 #include "../engine/OBJ_Loader.h"
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 void EntityRenderer::init() {
     auto fs = cmrc::client::get_filesystem();
-    auto v = fs.open("shaders/entity.vert"), f = fs.open("shaders/entity.frag"), t = fs.open("textures/kanye.png");
+    auto v = fs.open("shaders/entity.vert"), f = fs.open("shaders/entity.frag"), t = fs.open("textures/usermodel.png");
     Engine::Shader shader{std::string{v.begin(), v.end()}, std::string{f.begin(), f.end()}, "entity"};
     objl::Loader l{};
-    if (!l.LoadFile("models/kanye.obj"))
+    if (!l.LoadFile("models/usermodel.obj"))
         throw std::runtime_error("Could not load player model!");
 
     Engine::Texture texture{std::vector<unsigned char>{t.begin(), t.end()}, true};

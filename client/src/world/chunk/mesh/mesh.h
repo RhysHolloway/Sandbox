@@ -1,11 +1,6 @@
 #pragma once
 
-#include <atomic>
-
 #include <gl/glew.h>
-#include <glm/glm.hpp>
-
-#include "sandbox/util.h"
 #include "sandbox/world/chunk.h"
 
 #include "mesher.h"

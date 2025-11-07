@@ -1,3 +1,7 @@
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
 #include "glm/gtx/string_cast.hpp"
 
 #include "sandbox/host.h"
@@ -5,6 +9,8 @@
 #include "sandbox/packet.h"
 
 #include "world.h"
+
+#include "sandbox/util.h"
 
 //TODO remove
 //int counter = 0;

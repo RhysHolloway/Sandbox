@@ -5,11 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
-find_package(portaudio CONFIG REQUIRED)
+#find_package(portaudio CONFIG REQUIRED)
 find_package(CMakeRC CONFIG REQUIRED)
-find_path(ENET_DIR ../libs/enet/enet.h)
-find_path(BTP_INCLUDE "BS_thread_pool.hpp")
-add_subdirectory(libs/lodepng)
 
 #IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 #    set(portaudio_type portaudio)
@@ -19,6 +16,8 @@ add_subdirectory(libs/lodepng)
 
 include_directories(${CMAKE_SOURCE_DIR}/game) # SandboxGame
 include_directories(${CMAKE_SOURCE_DIR}/libs/enet) # enet
+include_directories(${CMAKE_SOURCE_DIR}/libs/lodepng) # LodePNG
+include_directories(${CMAKE_SOURCE_DIR}/libs/bstp) # BS_thread_pool
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -28,10 +27,10 @@ file(GLOB_RECURSE PROJECT_HEADERS src/*.hpp src/*.h)
 file(GLOB_RECURSE CLIENT_ASSETS assets/*)
 cmrc_add_resource_library(client-resources ALIAS client::rc NAMESPACE client WHENCE assets ${CLIENT_ASSETS})
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} ${CMAKE_SOURCE_DIR}/libs/lodepng/lodepng.cpp)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${BTP_INCLUDE} {ENET_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE SandboxGame client::rc glfw lodepng GLEW::GLEW ${portaudio_type})
+target_include_directories(${PROJECT_NAME} PRIVATE {ENET_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE SandboxGame client::rc glfw GLEW::GLEW)
 
 if(MSVC)
     set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_FLAGS /OPT:REF)
